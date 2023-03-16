@@ -1,0 +1,32 @@
+Data:
+https://data.cdc.gov/Vaccinations/COVID-19-Vaccinations-in-the-United-States-County/8xkx-amqh
+
+Time period: 20210201 - 20221101
+
+Data-collecting time:
+CDC | Data as of: May 20, 2021 6:00am ET. Posted: Thursday, May 20, 2021 8:56 PM ET
+
+Religion data:
+https://www.usreligioncensus.org/sites/default/files/2022-11/2020%20USRC%20Group%20Detail_0.xlsx
+
+Missouri has "St. Louis County" and "St. Louis City County"
+
+As of 2010, St. Louis County has a population of      998,954
+As of 2010, St. Louis City County has a population of 319,294
+
+When downloading data for Missouri state, change "St. Louis" to "St. Louis City" if the row has a lower vaccination rate for population fully vaccinated
+
+17 Illinois
+18 Indiana
+19 Iowa
+21 Kentucky
+26 Michigan
+29 Missouri
+36 New York State
+39 Ohio
+42 Pennsylvania
+55 Wisconsin
+
+Data: election-context-2018
+https://github.com/MEDSL/2018-elections-unoffical
+

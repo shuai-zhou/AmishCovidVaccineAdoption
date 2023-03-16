@@ -1,0 +1,48 @@
+--------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\sxz217\OneDrive - The Pennsylvania State University\Academic\Publication_Sub\AmishCovid202212\
+> results/s3.1_xtnbreg_v2.log
+  log type:  text
+ opened on:  14 Dec 2022, 13:45:08
+
+. 
+. *==========================================================
+. * tutorials
+. *==========================================================
+. ** Non-negative Continuous Right-skewed Panel Data
+. ** https://www.statalist.org/forums/forum/general-stata-discussion/general/1590559-non-negative-continuous-right-s
+> kewed-zero-inflated-panel-data-analysis
+. 
+. ** Negative Binomial Regression
+. ** https://stats.oarc.ucla.edu/stata/dae/negative-binomial-regression/
+. 
+. ** Model A Continuous DV With [0, ∞] Range
+. ** https://stats.stackexchange.com/questions/142134/how-should-i-model-a-continuous-dependent-variable-in-the-0-in
+> fty-range
+. 
+. *==========================================================
+. * macro IVs
+. *==========================================================
+. local ivs amishpct evang_no_amish colle trump2020 hhincmed1000
+
+. 
+. *==========================================================
+. * daily model: all counties
+. *==========================================================
+. use "$data/resdata_daily.dta", clear
+
+. xtset countynum datevar
+
+Panel variable: countynum (strongly balanced)
+ Time variable: datevar, 01feb2021 to 26oct2022, but with gaps
+         Delta: 1 day
+
+. 
+. xtnbreg dr `ivs' i.b1.met i.datevar i.countynum, pa vce(robust)
+note: 55117.countynum omitted because of collinearity.
+note: 55123.countynum omitted because of collinearity.
+note: 55129.countynum omitted because of collinearity.
+note: 55135.countynum omitted because of collinearity.
+note: 55137.countynum omitted because of collinearity.
+note: 55141.countynum omitted because of collinearity.
+

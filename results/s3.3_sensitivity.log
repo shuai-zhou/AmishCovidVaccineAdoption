@@ -1,0 +1,36 @@
+--------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  F:\OneDrive - The Pennsylvania State University\Academic\Publication_Sub\AmishCovid202212\results/s3.3_
+> sensitivity.log
+  log type:  text
+ opened on:   3 Jan 2023, 11:06:49
+
+. 
+. *==========================================================
+. * macro IVs
+. *==========================================================
+. local ivs amishpct evang_no_amish trump2020
+
+. 
+. *==========================================================
+. * daily model: all counties
+. *==========================================================
+. use "$data/resdata_daily.dta", clear
+
+. 
+. set seed 20230103
+
+. scalar rdm_num = floor(185640 *runiform() + 1)
+
+. dis rdm_num
+66649
+
+. scalar rdm_date = date[`rdm_num']
+date not found
+r(111);
+
+end of do-file
+
+r(111);
+
+. exit, clear

@@ -1,0 +1,387 @@
+--------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\sxz217\OneDrive - The Pennsylvania State University\Academic\Publication_Sub\AmishCovid202212\
+> results/s3.1_xtnbreg.log
+  log type:  text
+ opened on:  14 Dec 2022, 10:29:29
+
+. 
+. *==========================================================
+. * tutorials
+. *==========================================================
+. ** Non-negative Continuous Right-skewed Panel Data
+. ** https://www.statalist.org/forums/forum/general-stata-discussion/general/1590559-non-negative-continuous-right-s
+> kewed-zero-inflated-panel-data-analysis
+. 
+. ** Negative Binomial Regression
+. ** https://stats.oarc.ucla.edu/stata/dae/negative-binomial-regression/
+. 
+. ** Model A Continuous DV With [0, ∞] Range
+. ** https://stats.stackexchange.com/questions/142134/how-should-i-model-a-continuous-dependent-variable-in-the-0-in
+> fty-range
+. 
+. *==========================================================
+. * macro IVs
+. *==========================================================
+. local ivs amishpct evang_no_amish colle trump2020 hhincmed1000
+
+. 
+. *==========================================================
+. * daily model: all counties
+. *==========================================================
+. use "$data/resdata_daily.dta", clear
+
+. xtset countynum datevar
+
+Panel variable: countynum (strongly balanced)
+ Time variable: datevar, 01feb2021 to 26oct2022, but with gaps
+         Delta: 1 day
+
+. 
+. xtnbreg dr `ivs' i.b1.met, pa vce(robust)
+
+Iteration 1: tolerance = .74241637
+Iteration 2: tolerance = .39107437
+Iteration 3: tolerance = .13802534
+Iteration 4: tolerance = .0096014
+Iteration 5: tolerance = .00651599
+Iteration 6: tolerance = .00028852
+Iteration 7: tolerance = 1.420e-06
+Iteration 8: tolerance = 7.167e-09
+
+GEE population-averaged model                       Number of obs    = 185,640
+Group variable: countynum                           Number of groups =     357
+Family: Negative binomial(k=1)                      Obs per group:  
+Link:   Log                                                      min =     520
+Correlation: exchangeable                                        avg =   520.0
+                                                                 max =     520
+                                                    Wald chi2(6)     =  761.37
+Scale parameter = 1                                 Prob > chi2      =  0.0000
+
+                                (Std. err. adjusted for clustering on countynum)
+--------------------------------------------------------------------------------
+               |             Semirobust
+            dr | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+      amishpct |  -.0154643   .0019725    -7.84   0.000    -.0193303   -.0115983
+evang_no_amish |  -.0007503   .0006744    -1.11   0.266    -.0020721    .0005715
+         colle |  -.0033713   .0016611    -2.03   0.042     -.006627   -.0001156
+     trump2020 |  -.0122826   .0010536   -11.66   0.000    -.0143475   -.0102176
+  hhincmed1000 |   .0051555    .001041     4.95   0.000     .0031152    .0071957
+               |
+           met |
+    Non-metro  |   .0096843   .0167414     0.58   0.563    -.0231281    .0424968
+               |
+         _cons |  -1.700691   .1061199   -16.03   0.000    -1.908682     -1.4927
+--------------------------------------------------------------------------------
+
+. outreg2 using "$results/xtnbreg.doc", replace stats(coef se) ///
+>         label nodepvar ctitle("daily_all") ///
+>         dec(3) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +)
+results/xtnbreg.doc
+dir : seeout
+
+. 
+. *==========================================================
+. * daily model: 1%
+. *==========================================================
+. ** read data and set panel
+. use "$data/resdata_daily.dta", clear
+
+. drop if amishpct < 1
+(96,720 observations deleted)
+
+. xtset countynum datevar
+
+Panel variable: countynum (strongly balanced)
+ Time variable: datevar, 01feb2021 to 26oct2022, but with gaps
+         Delta: 1 day
+
+. 
+. ** poisson model
+. xtnbreg dr `ivs' i.b1.met, pa vce(robust)
+
+Iteration 1: tolerance = .74095611
+Iteration 2: tolerance = .38973893
+Iteration 3: tolerance = .1349955
+Iteration 4: tolerance = .00552555
+Iteration 5: tolerance = .00791288
+Iteration 6: tolerance = .00030802
+Iteration 7: tolerance = 1.481e-06
+Iteration 8: tolerance = 6.363e-09
+
+GEE population-averaged model                        Number of obs    = 88,920
+Group variable: countynum                            Number of groups =    171
+Family: Negative binomial(k=1)                       Obs per group:  
+Link:   Log                                                       min =    520
+Correlation: exchangeable                                         avg =  520.0
+                                                                  max =    520
+                                                     Wald chi2(6)     = 342.16
+Scale parameter = 1                                  Prob > chi2      = 0.0000
+
+                                (Std. err. adjusted for clustering on countynum)
+--------------------------------------------------------------------------------
+               |             Semirobust
+            dr | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+      amishpct |  -.0159085   .0022296    -7.14   0.000    -.0202784   -.0115385
+evang_no_amish |  -.0005624   .0009859    -0.57   0.568    -.0024947    .0013699
+         colle |  -.0038245   .0027248    -1.40   0.160    -.0091651     .001516
+     trump2020 |   -.012292   .0015445    -7.96   0.000    -.0153191   -.0092648
+  hhincmed1000 |   .0052612   .0017699     2.97   0.003     .0017923    .0087302
+               |
+           met |
+    Non-metro  |   -.018582   .0351797    -0.53   0.597    -.0875329    .0503689
+               |
+         _cons |  -1.673201   .1907728    -8.77   0.000    -2.047109   -1.299293
+--------------------------------------------------------------------------------
+
+. outreg2 using "$results/xtnbreg.doc", append stats(coef se) ///
+>         label nodepvar ctitle("daily_1%") ///
+>         dec(3) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +)
+results/xtnbreg.doc
+dir : seeout
+
+. 
+. *==========================================================
+. * weekly model: all counties
+. *==========================================================
+. use "$data/resdata_weekly.dta", clear
+
+. xtset countynum weekly
+
+Panel variable: countynum (strongly balanced)
+ Time variable: weekly, 2021w5 to 2022w43
+         Delta: 1 week
+
+. 
+. xtnbreg wr `ivs' i.b1.met, pa vce(robust)
+
+Iteration 1: tolerance = .77861048
+Iteration 2: tolerance = .4068488
+Iteration 3: tolerance = .16216813
+Iteration 4: tolerance = .0266807
+Iteration 5: tolerance = .00421208
+Iteration 6: tolerance = .00037968
+Iteration 7: tolerance = 3.373e-06
+Iteration 8: tolerance = 1.127e-08
+
+GEE population-averaged model                        Number of obs    = 32,487
+Group variable: countynum                            Number of groups =    357
+Family: Negative binomial(k=1)                       Obs per group:  
+Link:   Log                                                       min =     91
+Correlation: exchangeable                                         avg =   91.0
+                                                                  max =     91
+                                                     Wald chi2(6)     = 617.08
+Scale parameter = 1                                  Prob > chi2      = 0.0000
+
+                                (Std. err. adjusted for clustering on countynum)
+--------------------------------------------------------------------------------
+               |             Semirobust
+            wr | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+      amishpct |  -.0153461   .0021114    -7.27   0.000    -.0194843    -.011208
+evang_no_amish |  -.0006691   .0007265    -0.92   0.357    -.0020931    .0007549
+         colle |   5.96e-06   .0017854     0.00   0.997    -.0034934    .0035053
+     trump2020 |  -.0109839    .001158    -9.49   0.000    -.0132535   -.0087143
+  hhincmed1000 |   .0047052   .0011567     4.07   0.000     .0024382    .0069722
+               |
+           met |
+    Non-metro  |    -.00349   .0187545    -0.19   0.852    -.0402481     .033268
+               |
+         _cons |  -1.922805   .1170706   -16.42   0.000    -2.152259   -1.693351
+--------------------------------------------------------------------------------
+
+. outreg2 using "$results/xtnbreg.doc", append stats(coef se) ///
+>         label nodepvar ctitle("weekly_all") ///
+>         dec(3) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +)
+results/xtnbreg.doc
+dir : seeout
+
+. 
+. *==========================================================
+. * weekly model: 1%
+. *==========================================================
+. use "$data/resdata_weekly.dta", clear
+
+. drop if amishpct < 1
+(16,926 observations deleted)
+
+. xtset countynum weekly
+
+Panel variable: countynum (strongly balanced)
+ Time variable: weekly, 2021w5 to 2022w43
+         Delta: 1 week
+
+. 
+. xtnbreg wr `ivs' i.b1.met, pa vce(robust)
+
+Iteration 1: tolerance = .77269464
+Iteration 2: tolerance = .40390309
+Iteration 3: tolerance = .15689694
+Iteration 4: tolerance = .02150934
+Iteration 5: tolerance = .0054683
+Iteration 6: tolerance = .00034148
+Iteration 7: tolerance = 2.907e-06
+Iteration 8: tolerance = 1.221e-08
+
+GEE population-averaged model                        Number of obs    = 15,561
+Group variable: countynum                            Number of groups =    171
+Family: Negative binomial(k=1)                       Obs per group:  
+Link:   Log                                                       min =     91
+Correlation: exchangeable                                         avg =   91.0
+                                                                  max =     91
+                                                     Wald chi2(6)     = 271.04
+Scale parameter = 1                                  Prob > chi2      = 0.0000
+
+                                (Std. err. adjusted for clustering on countynum)
+--------------------------------------------------------------------------------
+               |             Semirobust
+            wr | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+      amishpct |   -.015993   .0023997    -6.66   0.000    -.0206963   -.0112898
+evang_no_amish |  -.0004218    .001042    -0.40   0.686     -.002464    .0016205
+         colle |  -.0005185   .0029672    -0.17   0.861    -.0063341    .0052972
+     trump2020 |  -.0111108   .0016616    -6.69   0.000    -.0143675   -.0078541
+  hhincmed1000 |   .0045292   .0019069     2.38   0.018     .0007917    .0082667
+               |
+           met |
+    Non-metro  |  -.0284883   .0390069    -0.73   0.465    -.1049405    .0479638
+               |
+         _cons |  -1.872677   .2004583    -9.34   0.000    -2.265568   -1.479786
+--------------------------------------------------------------------------------
+
+. outreg2 using "$results/xtnbreg.doc", append stats(coef se) ///
+>         label nodepvar ctitle("weekly_1%") ///
+>         dec(3) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +)
+results/xtnbreg.doc
+dir : seeout
+
+. 
+. *==========================================================
+. * monthly model: all counties
+. *==========================================================
+. use "$data/resdata_monthly.dta", clear
+
+. xtset countynum monthly
+
+Panel variable: countynum (strongly balanced)
+ Time variable: monthly, 2021m2 to 2022m10
+         Delta: 1 month
+
+. 
+. xtnbreg mr `ivs' i.b1.met, pa vce(robust)
+
+Iteration 1: tolerance = .78051647
+Iteration 2: tolerance = .40768693
+Iteration 3: tolerance = .16348887
+Iteration 4: tolerance = .02771987
+Iteration 5: tolerance = .00400136
+Iteration 6: tolerance = .00037592
+Iteration 7: tolerance = 3.298e-06
+Iteration 8: tolerance = 1.039e-08
+
+GEE population-averaged model                        Number of obs    =  7,497
+Group variable: countynum                            Number of groups =    357
+Family: Negative binomial(k=1)                       Obs per group:  
+Link:   Log                                                       min =     21
+Correlation: exchangeable                                         avg =   21.0
+                                                                  max =     21
+                                                     Wald chi2(6)     = 640.90
+Scale parameter = 1                                  Prob > chi2      = 0.0000
+
+                                (Std. err. adjusted for clustering on countynum)
+--------------------------------------------------------------------------------
+               |             Semirobust
+            mr | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+      amishpct |  -.0154079   .0020899    -7.37   0.000    -.0195041   -.0113117
+evang_no_amish |  -.0006886   .0007022    -0.98   0.327    -.0020649    .0006877
+         colle |  -.0000416   .0017543    -0.02   0.981    -.0034799    .0033967
+     trump2020 |  -.0109767   .0011357    -9.66   0.000    -.0132027   -.0087507
+  hhincmed1000 |   .0048322   .0011448     4.22   0.000     .0025884     .007076
+               |
+           met |
+    Non-metro  |  -.0003629   .0182583    -0.02   0.984    -.0361485    .0354226
+               |
+         _cons |  -1.935581    .115277   -16.79   0.000     -2.16152   -1.709642
+--------------------------------------------------------------------------------
+
+. outreg2 using "$results/xtnbreg.doc", append stats(coef se) ///
+>         label nodepvar ctitle("monthly_all") ///
+>         dec(3) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +)
+results/xtnbreg.doc
+dir : seeout
+
+. 
+. *==========================================================
+. * monthly model: 1%
+. *==========================================================
+. use "$data/resdata_monthly.dta", clear
+
+. drop if amishpct < 1
+(3,906 observations deleted)
+
+. xtset countynum monthly
+
+Panel variable: countynum (strongly balanced)
+ Time variable: monthly, 2021m2 to 2022m10
+         Delta: 1 month
+
+. 
+. xtnbreg mr `ivs' i.b1.met, pa vce(robust)
+
+Iteration 1: tolerance = .77399698
+Iteration 2: tolerance = .40448845
+Iteration 3: tolerance = .15782064
+Iteration 4: tolerance = .02224414
+Iteration 5: tolerance = .00530885
+Iteration 6: tolerance = .00033449
+Iteration 7: tolerance = 2.680e-06
+Iteration 8: tolerance = 1.054e-08
+
+GEE population-averaged model                        Number of obs    =  3,591
+Group variable: countynum                            Number of groups =    171
+Family: Negative binomial(k=1)                       Obs per group:  
+Link:   Log                                                       min =     21
+Correlation: exchangeable                                         avg =   21.0
+                                                                  max =     21
+                                                     Wald chi2(6)     = 281.24
+Scale parameter = 1                                  Prob > chi2      = 0.0000
+
+                                (Std. err. adjusted for clustering on countynum)
+--------------------------------------------------------------------------------
+               |             Semirobust
+            mr | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+      amishpct |  -.0160937   .0023747    -6.78   0.000     -.020748   -.0114393
+evang_no_amish |  -.0003958   .0010237    -0.39   0.699    -.0024022    .0016105
+         colle |  -.0006712    .002915    -0.23   0.818    -.0063845    .0050421
+     trump2020 |  -.0111367   .0016372    -6.80   0.000    -.0143455   -.0079279
+  hhincmed1000 |   .0046555   .0018973     2.45   0.014     .0009368    .0083742
+               |
+           met |
+    Non-metro  |  -.0253929   .0382368    -0.66   0.507    -.1003356    .0495499
+               |
+         _cons |  -1.881516   .1991537    -9.45   0.000     -2.27185   -1.491181
+--------------------------------------------------------------------------------
+
+. outreg2 using "$results/xtnbreg.doc", append stats(coef se) ///
+>         label nodepvar ctitle("monthly_1%") ///
+>         dec(3) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +)
+results/xtnbreg.doc
+dir : seeout
+
+. 
+. *==========================================================
+. * end logging
+. *==========================================================
+. clear
+
+. log close _all
+      name:  <unnamed>
+       log:  C:\Users\sxz217\OneDrive - The Pennsylvania State University\Academic\Publication_Sub\AmishCovid202212\
+> results/s3.1_xtnbreg.log
+  log type:  text
+ closed on:  14 Dec 2022, 10:30:25
+--------------------------------------------------------------------------------------------------------------------

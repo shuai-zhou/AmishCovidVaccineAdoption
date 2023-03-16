@@ -1,0 +1,301 @@
+------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  F:\OneDrive - The Pennsylvania State University\Academic\Publication_Sub\AmishCovid202302_Censu
+> s2020Pop\results/s3.4_nbreg.log
+  log type:  text
+ opened on:  15 Mar 2023, 22:59:07
+
+. 
+. *==========================================================
+. * macro IVs
+. *==========================================================
+. local ivs amishpct evang_no_amish trump2020 hhincmed1000
+
+. 
+. *==========================================================
+. * randomly select date
+. *==========================================================
+. // set seed 20230103
+. // scalar rdm_num = floor(185640 *runiform() + 1)
+. // dis rdm_num
+. // scalar rdm_date = date[`rdm_num']
+. // dis rdm_date
+. 
+. *==========================================================
+. * select 01/19/2022
+. *==========================================================
+. ** 01/19/2022 has the most weekly COVID cases
+. ** see here: https://covid.cdc.gov/covid-data-tracker/#trends_weeklycases_select_00
+. use "$data/resdata_daily.dta", clear
+
+. unique countyfips // n = 357
+Number of unique values of countyfips is  357
+Number of records is  185640
+
+. 
+. keep if date == "01/19/2022"
+(185,283 observations deleted)
+
+. unique countyfips // n = 357
+Number of unique values of countyfips is  357
+Number of records is  357
+
+. 
+. tempfile daily_20220119
+
+. save `daily_20220119'
+file C:\Users\ioren\AppData\Local\Temp\ST_211c_000001.tmp saved
+
+. 
+. *==========================================================
+. * daily model: all counties
+. *==========================================================
+. use `daily_20220119', clear
+
+. 
+. sum dr
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+          dr |        357    .1473127    .5427395  -3.903383   5.882353
+
+. drop if dr < 0
+(9 observations deleted)
+
+. 
+. nbreg dr `ivs' i.b1.met, vce(robust)
+note: you are responsible for interpretation of non-count dep. variable
+
+Fitting Poisson model:
+
+Iteration 0:   log pseudolikelihood = -163.15204  
+Iteration 1:   log pseudolikelihood = -163.14761  
+Iteration 2:   log pseudolikelihood = -163.14761  
+
+Fitting constant-only model:
+
+Iteration 0:   log pseudolikelihood =  -173.8011  
+Iteration 1:   log pseudolikelihood = -165.23848  
+Iteration 2:   log pseudolikelihood = -165.23737  
+Iteration 3:   log pseudolikelihood = -165.23737  
+
+Fitting full model:
+
+Iteration 0:   log pseudolikelihood = -162.83914  
+Iteration 1:   log pseudolikelihood = -162.77699  
+Iteration 2:   log pseudolikelihood = -162.77696  
+Iteration 3:   log pseudolikelihood = -162.77696  
+
+Negative binomial regression                    Number of obs     =        348
+                                                Wald chi2(5)      =      21.91
+Dispersion           = mean                     Prob > chi2       =     0.0005
+Log pseudolikelihood = -162.77696               Pseudo R2         =     0.0149
+
+--------------------------------------------------------------------------------
+               |               Robust
+            dr |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+---------------+----------------------------------------------------------------
+      amishpct |  -.0500561   .0235729    -2.12   0.034    -.0962582   -.0038541
+evang_no_amish |   .0142603     .00598     2.38   0.017     .0025397    .0259809
+     trump2020 |  -.0038493   .0150626    -0.26   0.798    -.0333715    .0256728
+  hhincmed1000 |  -.0060372    .009547    -0.63   0.527    -.0247489    .0126746
+               |
+           met |
+    Non-metro  |  -.2150535   .2369874    -0.91   0.364    -.6795401    .2494332
+               |
+         _cons |  -1.185481   1.331287    -0.89   0.373    -3.794756    1.423793
+---------------+----------------------------------------------------------------
+      /lnalpha |  -2.206135   2.239275                     -6.595032    2.182763
+---------------+----------------------------------------------------------------
+         alpha |   .1101255   .2466012                      .0013671     8.87078
+--------------------------------------------------------------------------------
+
+. collin `ivs' met
+(obs=348)
+
+  Collinearity Diagnostics
+
+                        SQRT                   R-
+  Variable      VIF     VIF    Tolerance    Squared
+----------------------------------------------------
+  amishpct      1.13    1.06    0.8859      0.1141
+evang_no_amish      1.36    1.16    0.7376      0.2624
+ trump2020      1.66    1.29    0.6008      0.3992
+hhincmed1000      1.58    1.26    0.6349      0.3651
+       met      1.32    1.15    0.7578      0.2422
+----------------------------------------------------
+  Mean VIF      1.41
+
+                           Cond
+        Eigenval          Index
+---------------------------------
+    1     4.1938          1.0000
+    2     0.9002          2.1585
+    3     0.6094          2.6233
+    4     0.2720          3.9264
+    5     0.0207         14.2340
+    6     0.0039         32.8161
+---------------------------------
+ Condition Number        32.8161 
+ Eigenvalues & Cond Index computed from scaled raw sscp (w/ intercept)
+ Det(correlation matrix)    0.4070
+
+. 
+. predict drhat
+(option n assumed; predicted number of events)
+
+. gen resid2 = (dr - drhat) ^ 2
+
+. gen ssr = sum(resid2)
+
+. egen drmean = mean(dr)
+
+. gen diff2 = (dr - drmean) ^ 2
+
+. egen sst = sum(diff2)
+
+. dis 1 - ssr[_N] / sst[_N]
+.010575
+
+. 
+. outreg2 using "$results/nbreg_coef.doc", replace stats(coef se) ///
+>         label nodepvar ctitle("daily_all") ///
+>         dec(3) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +)
+results/nbreg_coef.doc
+dir : seeout
+
+. 
+. *==========================================================
+. * daily model: 1%
+. *==========================================================
+. use `daily_20220119', clear
+
+. drop if amishpct < 1
+(186 observations deleted)
+
+. 
+. sum dr
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+          dr |        171    .1608616    .6454623  -2.529762   5.882353
+
+. drop if dr < 0
+(3 observations deleted)
+
+. 
+. nbreg dr `ivs' i.b1.met, vce(robust)
+note: you are responsible for interpretation of non-count dep. variable
+
+Fitting Poisson model:
+
+Iteration 0:   log pseudolikelihood = -84.239773  
+Iteration 1:   log pseudolikelihood =  -84.17982  
+Iteration 2:   log pseudolikelihood =   -84.1798  
+Iteration 3:   log pseudolikelihood =   -84.1798  
+
+Fitting constant-only model:
+
+Iteration 0:   log pseudolikelihood = -85.345086  
+Iteration 1:   log pseudolikelihood = -84.178193  
+Iteration 2:   log pseudolikelihood = -84.166547  
+Iteration 3:   log pseudolikelihood = -84.166524  
+Iteration 4:   log pseudolikelihood = -84.166524  
+
+Fitting full model:
+
+Iteration 0:   log pseudolikelihood = -81.945043  
+Iteration 1:   log pseudolikelihood = -81.667746  
+Iteration 2:   log pseudolikelihood = -81.667145  
+Iteration 3:   log pseudolikelihood = -81.667145  
+
+Negative binomial regression                    Number of obs     =        168
+                                                Wald chi2(5)      =       8.17
+Dispersion           = mean                     Prob > chi2       =     0.1473
+Log pseudolikelihood = -81.667145               Pseudo R2         =     0.0297
+
+--------------------------------------------------------------------------------
+               |               Robust
+            dr |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+---------------+----------------------------------------------------------------
+      amishpct |  -.1187161   .0705169    -1.68   0.092    -.2569267    .0194944
+evang_no_amish |    .009528   .0073773     1.29   0.197    -.0049313    .0239873
+     trump2020 |   .0180304    .032009     0.56   0.573    -.0447061     .080767
+  hhincmed1000 |   .0000784   .0215251     0.00   0.997      -.04211    .0422669
+               |
+           met |
+    Non-metro  |   .1807494   .4458808     0.41   0.685    -.6931608     1.05466
+               |
+         _cons |  -2.975895   3.110048    -0.96   0.339    -9.071478    3.119688
+---------------+----------------------------------------------------------------
+      /lnalpha |  -.7778877    .911155                     -2.563719    1.007943
+---------------+----------------------------------------------------------------
+         alpha |   .4593753   .4185621                      .0770178     2.73996
+--------------------------------------------------------------------------------
+
+. collin `ivs' met
+(obs=168)
+
+  Collinearity Diagnostics
+
+                        SQRT                   R-
+  Variable      VIF     VIF    Tolerance    Squared
+----------------------------------------------------
+  amishpct      1.25    1.12    0.8012      0.1988
+evang_no_amish      1.45    1.20    0.6916      0.3084
+ trump2020      1.64    1.28    0.6113      0.3887
+hhincmed1000      1.62    1.27    0.6172      0.3828
+       met      1.20    1.10    0.8321      0.1679
+----------------------------------------------------
+  Mean VIF      1.43
+
+                           Cond
+        Eigenval          Index
+---------------------------------
+    1     4.2507          1.0000
+    2     0.8739          2.2055
+    3     0.5775          2.7132
+    4     0.2782          3.9092
+    5     0.0168         15.9298
+    6     0.0030         37.5687
+---------------------------------
+ Condition Number        37.5687 
+ Eigenvalues & Cond Index computed from scaled raw sscp (w/ intercept)
+ Det(correlation matrix)    0.4170
+
+. 
+. predict drhat
+(option n assumed; predicted number of events)
+
+. gen resid2 = (dr - drhat) ^ 2
+
+. gen ssr = sum(resid2)
+
+. egen drmean = mean(dr)
+
+. gen diff2 = (dr - drmean) ^ 2
+
+. egen sst = sum(diff2)
+
+. dis 1 - ssr[_N] / sst[_N]
+.01609183
+
+. 
+. outreg2 using "$results/nbreg_coef.doc", append stats(coef se) ///
+>         label nodepvar ctitle("daily_all") ///
+>         dec(3) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +)
+results/nbreg_coef.doc
+dir : seeout
+
+. 
+. *==========================================================
+. * end logging
+. *==========================================================
+. // clear
+. log close _all
+      name:  <unnamed>
+       log:  F:\OneDrive - The Pennsylvania State University\Academic\Publication_Sub\AmishCovid202302_Censu
+> s2020Pop\results/s3.4_nbreg.log
+  log type:  text
+ closed on:  15 Mar 2023, 22:59:10
+------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,264 @@
+------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  F:\OneDrive - The Pennsylvania State University\Academic\Publication_Sub\AmishCovid202302_Censu
+> s2020Pop\results/s1.2_acs2020.log
+  log type:  text
+ opened on:  25 Feb 2023, 19:02:24
+
+. 
+. *==========================================================
+. * acs 2020
+. *==========================================================
+. clear
+
+. infile using "$data/R13253557.dct", using("$data/R13253557_SL050.txt")
+
+dictionary {
+_first(2)
+str50 FIPS "FIPS"
+str50 QName "Qualifying Name"
+str50 FILEID "File identification"
+str50 STUSAB "State Postal Abbreviation"
+str50 SUMLEV "Summary Level"
+str50 GEOCOMP "Geographic Component"
+str50 LOGRECNO "Logical Record Number"
+str50 US "US"
+str50 REGION "Census Region"
+str50 DIVISION "Census Division"
+str50 STATECE "State (Census Code)"
+str50 STATE "State (FIPS Code)"
+str50 COUNTY "County of current residence"
+str50 COUSUB "County Subdivision (FIPS)"
+str50 PLACE "Place (FIPS Code)"
+str50 TRACT "Census Tract"
+str50 BLKGRP "Block Group"
+str50 CONCIT "Consolidated City"
+str50 AIANHH "American Indian Area/Alaska Native Area/ Hawaiian Home Land (Census)"
+str50 AIANHHFP "American Indian Area/Alaska Native Area/ Hawaiian Home Land (FIPS)"
+str50 AIHHTLI "American Indian Trust Land/Hawaiian Home Land Indicator"
+str50 AITSCE "American Indian Tribal Subdivision (Census)"
+str50 AITS "American Indian Tribal Subdivision (FIPS)"
+str50 ANRC "Alaska Native Regional Corporation (FIPS)"
+str50 CBSA "Metropolitan and Micropolitan Statistical Area"
+str50 CSA "Combined Statistical Area"
+str50 METDIV "Metropolitan Statistical Area- Metropolitan Division"
+str50 MACC "Metropolitan Area Central City"
+str50 MEMI "Metropolitan/Micropolitan Indicator Flag"
+str50 NECTA "New England City and Town Area"
+str50 CNECTA "New England City and Town Combined Statistical Area"
+str50 NECTADIV "New England City and Town Area Division"
+str50 UA "Urban Area"
+str50 UACP "Urban Area Central Place"
+str50 CDCURR "Current Congressional District ***"
+str50 SLDU "State Legislative District Upper"
+str50 SLDL "State Legislative District Lower"
+str50 VTD "Voting District"
+str50 ZCTA3 "ZIP Code Tabulation Area (3-digit)"
+str50 ZCTA5 "5-digit ZIP Code Tabulation Area"
+str50 SUBMCD "Subminor Civil Division (FIPS)"
+str50 SDELM "State-School District (Elementary)"
+str50 SDSEC "State-School District (Secondary)"
+str50 SDUNI "State-School District (Unified)"
+str50 UR "Urban/Rural"
+str50 PCI "Principal City Indicator"
+str50 TAZ "Traffic Analysis Zone"
+str50 UGA "Urban Growth Area"
+str50 PUMA5 "Public Use Microdata Area – 5% File"
+str50 PUMA1 "Public Use Microdata Area - 1% File"
+str50 GEOID "Geographic Identifier"
+str50 NAME "Area Name"
+str50 BTTR "Tribal Tract"
+str50 BTBG "Tribal Block Group"
+str50 PLACESE "Place (State FIPS + Place FIPS)"
+double A14001_001 "Households:"
+double A14001_002 "Households: Less than $10,000"
+double A14001_003 "Households: $10,000 to $14,999"
+double A14001_004 "Households: $15,000 to $19,999"
+double A14001_005 "Households: $20,000 to $24,999"
+double A14001_006 "Households: $25,000 to $29,999"
+double A14001_007 "Households: $30,000 to $34,999"
+double A14001_008 "Households: $35,000 to $39,999"
+double A14001_009 "Households: $40,000 to $44,999"
+double A14001_010 "Households: $45,000 to $49,999"
+double A14001_011 "Households: $50,000 to $59,999"
+double A14001_012 "Households: $60,000 to $74,999"
+double A14001_013 "Households: $75,000 to $99,999"
+double A14001_014 "Households: $100,000 to $124,999"
+double A14001_015 "Households: $125,000 to $149,999"
+double A14001_016 "Households: $150,000 to $199,999"
+double A14001_017 "Households: $200,000 or More"
+double A14006_001 "Median Household Income (In 2020 Inflation Adjusted Dollars)"
+double A14008_001 "Average Household Income (In 2020 Inflation Adjusted Dollars)"
+long A12001_001 "Population 25 Years and Over:"
+long A12001_002 "Population 25 Years and Over: Less than High School"
+long A12001_003 "Population 25 Years and Over: High School Graduate (Includes Equivalency)"
+long A12001_004 "Population 25 Years and Over: Some College"
+long A12001_005 "Population 25 Years and Over: Bachelor's Degree"
+long A12001_006 "Population 25 Years and Over: Master's Degree"
+long A12001_007 "Population 25 Years and Over: Professional School Degree"
+long A12001_008 "Population 25 Years and Over: Doctorate Degree"
+long A00001_001 "Total Population"
+long B12001_001 "Population 25 Years and Over"
+long B12001_002 "Population 25 Years and Over: Less than High School"
+long B12001_003 "Population 25 Years and Over: High School Diploma"
+long B12001_004 "Population 25 Years and Over: Bachelor's Degree or Better"
+}
+
+'' cannot be read as a number for A14006_001[2646]
+(3,221 observations read)
+
+. compress
+  variable A14001_001 was double now long
+  variable A14001_002 was double now long
+  variable A14001_003 was double now long
+  variable A14001_004 was double now long
+  variable A14001_005 was double now long
+  variable A14001_006 was double now long
+  variable A14001_007 was double now long
+  variable A14001_008 was double now long
+  variable A14001_009 was double now long
+  variable A14001_010 was double now long
+  variable A14001_011 was double now long
+  variable A14001_012 was double now long
+  variable A14001_013 was double now long
+  variable A14001_014 was double now long
+  variable A14001_015 was double now long
+  variable A14001_016 was double now long
+  variable A14001_017 was double now long
+  variable A14006_001 was double now long
+  variable FIPS was str50 now str5
+  variable QName was str50 now str42
+  variable FILEID was str50 now str5
+  variable STUSAB was str50 now str2
+  variable SUMLEV was str50 now str3
+  variable GEOCOMP was str50 now str2
+  variable LOGRECNO was str50 now str7
+  variable US was str50 now str1
+  variable REGION was str50 now str1
+  variable DIVISION was str50 now str1
+  variable STATECE was str50 now str1
+  variable STATE was str50 now str2
+  variable COUNTY was str50 now str3
+  variable COUSUB was str50 now str1
+  variable PLACE was str50 now str1
+  variable TRACT was str50 now str1
+  variable BLKGRP was str50 now str1
+  variable CONCIT was str50 now str1
+  variable AIANHH was str50 now str1
+  variable AIANHHFP was str50 now str1
+  variable AIHHTLI was str50 now str1
+  variable AITSCE was str50 now str1
+  variable AITS was str50 now str1
+  variable ANRC was str50 now str1
+  variable CBSA was str50 now str1
+  variable CSA was str50 now str1
+  variable METDIV was str50 now str1
+  variable MACC was str50 now str1
+  variable MEMI was str50 now str1
+  variable NECTA was str50 now str1
+  variable CNECTA was str50 now str1
+  variable NECTADIV was str50 now str1
+  variable UA was str50 now str1
+  variable UACP was str50 now str1
+  variable CDCURR was str50 now str1
+  variable SLDU was str50 now str1
+  variable SLDL was str50 now str1
+  variable VTD was str50 now str1
+  variable ZCTA3 was str50 now str1
+  variable ZCTA5 was str50 now str1
+  variable SUBMCD was str50 now str1
+  variable SDELM was str50 now str1
+  variable SDSEC was str50 now str1
+  variable SDUNI was str50 now str1
+  variable UR was str50 now str1
+  variable PCI was str50 now str1
+  variable TAZ was str50 now str1
+  variable UGA was str50 now str1
+  variable PUMA5 was str50 now str1
+  variable PUMA1 was str50 now str1
+  variable GEOID was str50 now str12
+  variable NAME was str50 now str33
+  variable BTTR was str50 now str1
+  variable BTBG was str50 now str1
+  variable PLACESE was str50 now str1
+  (8,574,302 bytes saved)
+
+. rename (FIPS NAME A00001_001) (countyfips acscounty totpop)
+
+. gen hhinc_med = A14006_001
+(1 missing value generated)
+
+. gen hhinc_avg = A14008_001
+
+. gen colle = B12001_004 / B12001_001 * 100
+
+. gen fullname = QName
+
+. order countyfips fullname acscounty totpop hhinc* colle
+
+. keep countyfips fullname acscounty totpop hhinc* colle
+
+. 
+. *==========================================================
+. * merge population 2020 from census 2020
+. *==========================================================
+. merge 1:1 countyfips using "$data/pop2020.dta", gen(_mg)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                            78
+        from master                        78  (_mg==1)
+        from using                          0  (_mg==2)
+
+    matched                             3,143  (_mg==3)
+    -----------------------------------------
+
+. tab _mg, mi
+
+                    _mg |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+        master only (1) |         78        2.42        2.42
+            matched (3) |      3,143       97.58      100.00
+------------------------+-----------------------------------
+                  Total |      3,221      100.00
+
+. keep if _mg == 3
+(78 observations deleted)
+
+. drop _mg
+
+. 
+. compare totpop pop2020
+
+                                        ---------- difference ----------
+                            count       minimum      average     maximum
+------------------------------------------------------------------------
+totpop<pop2020               1731       -159303    -3526.288          -2
+totpop=pop2020                  2
+totpop>pop2020               1410             1     868.1071       26673
+                       ----------
+jointly defined              3143       -159303    -1552.648       26673
+                       ----------
+total                        3143
+
+. bro countyfips totpop pop2020
+
+. drop totpop
+
+. rename pop2020 totpop
+
+. 
+.  save "$data/acs2020.dta", replace
+file data/acs2020.dta saved
+
+. 
+. *==========================================================
+. * end logging
+. *==========================================================
+. log close _all
+      name:  <unnamed>
+       log:  F:\OneDrive - The Pennsylvania State University\Academic\Publication_Sub\AmishCovid202302_Censu
+> s2020Pop\results/s1.2_acs2020.log
+  log type:  text
+ closed on:  25 Feb 2023, 19:02:25
+------------------------------------------------------------------------------------------------------------

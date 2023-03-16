@@ -1,0 +1,184 @@
+------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  F:\OneDrive - The Pennsylvania State University\Academic\Publication_Sub\AmishCovid202302_Censu
+> s2020Pop\results/s2.1_dailyweeklymonthly.log
+  log type:  text
+ opened on:  25 Feb 2023, 19:10:55
+
+. 
+. *==========================================================
+. * daily vaccination rate
+. *==========================================================
+. use "$data/resdata.dta", clear
+
+. keep countyfips date datevar year dr ///
+>         amishpct evang_no_amish colle hhincmed1000 trump2020 met countynum fullname day week month year
+
+. egen amishpct4 = xtile(amishpct), nq(4)
+
+. compress
+  variable amishpct4 was float now byte
+  (556,920 bytes saved)
+
+. save "$data/resdata_daily.dta", replace
+file data/resdata_daily.dta saved
+
+. 
+. *==========================================================
+. * weekly vaccination rate
+. *==========================================================
+. ** county data
+. use "$data/resdata.dta", clear
+
+. keep countyfips weekly amishpct evang_no_amish colle hhincmed1000 trump2020 met countynum fullname day wee
+> k month year
+
+. bysort countyfips weekly: gen var1 = _n
+
+. keep if var1 == 1
+(153,153 observations deleted)
+
+. drop var1
+
+. egen amishpct4 = xtile(amishpct), nq(4)
+
+. tempfile county_data_weekly
+
+. save `county_data_weekly'
+file C:\Users\ioren\AppData\Local\Temp\ST_498_000001.tmp saved
+
+. 
+. ** weekly vaccination data
+. ** see how to calculate weighted average using "collapse"
+. ** https://stackoverflow.com/questions/37764573/weighted-average-in-statas-collapse-command
+. use "$data/resdata.dta", clear
+
+. keep countyfips weekly dr totpop
+
+. collapse (mean) wr = dr [w=totpop], by(countyfips weekly)
+(analytic weights assumed)
+
+. tempfile vac_weekly
+
+. save `vac_weekly'
+file C:\Users\ioren\AppData\Local\Temp\ST_498_000002.tmp saved
+
+. 
+. ** merge county and weekly vaccination data
+. use `county_data_weekly', clear
+
+. merge 1:1 countyfips weekly using `vac_weekly', gen(mg)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                            32,487  (mg==3)
+    -----------------------------------------
+
+. tab mg, mi
+
+                     mg |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+            matched (3) |     32,487      100.00      100.00
+------------------------+-----------------------------------
+                  Total |     32,487      100.00
+
+. drop mg
+
+. label variable wr "Weekly vaccination rate"
+
+. order countyfips weekly wr
+
+. 
+. compress
+  variable amishpct4 was float now byte
+  (97,461 bytes saved)
+
+. save "$data/resdata_weekly.dta", replace
+file data/resdata_weekly.dta saved
+
+. 
+. *==========================================================
+. * monthly vaccination rate
+. *==========================================================
+. ** county data
+. use "$data/resdata.dta", clear
+
+. keep countyfips monthly amishpct evang_no_amish colle hhincmed1000 trump2020 met countynum fullname day we
+> ek month year
+
+. bysort countyfips monthly: gen var1 = _n
+
+. keep if var1 == 1
+(178,143 observations deleted)
+
+. drop var1
+
+. egen amishpct4 = xtile(amishpct), nq(4)
+
+. tempfile county_data_monthly
+
+. save `county_data_monthly'
+file C:\Users\ioren\AppData\Local\Temp\ST_498_000003.tmp saved
+
+. 
+. ** monthly vaccination data
+. ** see how to calculate weighted average using "collapse"
+. ** https://stackoverflow.com/questions/37764573/weighted-average-in-statas-collapse-command
+. use "$data/resdata.dta", clear
+
+. keep countyfips monthly dr totpop
+
+. collapse (mean) mr = dr [w=totpop], by(countyfips monthly)
+(analytic weights assumed)
+
+. tempfile vac_monthly
+
+. save `vac_monthly'
+file C:\Users\ioren\AppData\Local\Temp\ST_498_000004.tmp saved
+
+. 
+. ** merge county and monthly vaccination data
+. use `county_data_monthly', clear
+
+. merge 1:1 countyfips monthly using `vac_monthly', gen(mg)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                             7,497  (mg==3)
+    -----------------------------------------
+
+. tab mg, mi
+
+                     mg |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+            matched (3) |      7,497      100.00      100.00
+------------------------+-----------------------------------
+                  Total |      7,497      100.00
+
+. drop mg
+
+. label variable mr "Monthly vaccination rate"
+
+. order countyfips monthly mr
+
+. 
+. compress
+  variable amishpct4 was float now byte
+  (22,491 bytes saved)
+
+. save "$data/resdata_monthly.dta", replace
+file data/resdata_monthly.dta saved
+
+. 
+. *==========================================================
+. * end logging
+. *==========================================================
+. log close _all
+      name:  <unnamed>
+       log:  F:\OneDrive - The Pennsylvania State University\Academic\Publication_Sub\AmishCovid202302_Censu
+> s2020Pop\results/s2.1_dailyweeklymonthly.log
+  log type:  text
+ closed on:  25 Feb 2023, 19:10:57
+------------------------------------------------------------------------------------------------------------

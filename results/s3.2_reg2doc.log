@@ -1,0 +1,156 @@
+--------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  F:\OneDrive - The Pennsylvania State University\Academic\Publication_Sub\AmishCovid202212\results/s3.2_
+> reg2doc.log
+  log type:  text
+ opened on:  28 Dec 2022, 21:27:03
+
+. 
+. *==========================================================
+. * daily model: all counties
+. *==========================================================
+. ** read regression results
+. import excel "$data/xtnbreg_irr.xlsx", firstrow case(lower) sheet("daily_all") clear
+(7 vars, 7 obs)
+
+. 
+. ** generate SIG level
+. gen sig = "***" if pval < 0.001
+(3 missing values generated)
+
+. replace sig = "**" if pval >= 0.001 & pval < 0.01
+(0 real changes made)
+
+. replace sig = "*" if pval >= 0.01 & pval < 0.05
+(1 real change made)
+
+. replace sig = "+" if pval >= 0.05 & pval < 0.1
+(0 real changes made)
+
+. 
+. ** format IRR and STDERR and keep three decimals
+. gen irr3 = string(real(string(round(irr, 0.001))), "%05.3f")
+
+. gen stderr3 = string(real(string(round(stderr, 0.001))), "%05.3f")
+
+. 
+. ** concatenate IRR and SIG
+. gen irr_sig = irr3 + sig
+
+. 
+. ** order variables
+. order var irr_sig stderr3
+
+. 
+. *==========================================================
+. * daily model: 1%
+. *==========================================================
+. ** read regression results
+. import excel "$data/xtnbreg_irr.xlsx", firstrow case(lower) sheet("daily_1pct") clear
+(7 vars, 7 obs)
+
+. 
+. ** generate SIG level
+. gen sig = "***" if pval < 0.001
+(4 missing values generated)
+
+. replace sig = "**" if pval >= 0.001 & pval < 0.01
+(1 real change made)
+
+. replace sig = "*" if pval >= 0.01 & pval < 0.05
+(0 real changes made)
+
+. replace sig = "+" if pval >= 0.05 & pval < 0.1
+(0 real changes made)
+
+. 
+. ** format IRR and STDERR and keep three decimals
+. gen irr3 = string(real(string(round(irr, 0.001))), "%05.3f")
+
+. gen stderr3 = string(real(string(round(stderr, 0.001))), "%05.3f")
+
+. 
+. ** concatenate IRR and SIG
+. gen irr_sig = irr3 + sig
+
+. 
+. ** order variables
+. order var irr_sig stderr3
+
+. 
+. *==========================================================
+. * weekly model: all counties
+. *==========================================================
+. ** read regression results
+. import excel "$data/xtnbreg_irr.xlsx", firstrow case(lower) sheet("weekly_all") clear
+(7 vars, 7 obs)
+
+. 
+. ** generate SIG level
+. gen sig = "***" if pval < 0.001
+(3 missing values generated)
+
+. replace sig = "**" if pval >= 0.001 & pval < 0.01
+(0 real changes made)
+
+. replace sig = "*" if pval >= 0.01 & pval < 0.05
+(0 real changes made)
+
+. replace sig = "+" if pval >= 0.05 & pval < 0.1
+(0 real changes made)
+
+. 
+. ** format IRR and STDERR and keep three decimals
+. gen irr3 = string(real(string(round(irr, 0.001))), "%05.3f")
+
+. gen stderr3 = string(real(string(round(stderr, 0.001))), "%05.3f")
+
+. 
+. ** concatenate IRR and SIG
+. gen irr_sig = irr3 + sig
+
+. 
+. ** order variables
+. order var irr_sig stderr3
+
+. 
+. *==========================================================
+. * weekly model: 1%
+. *==========================================================
+. ** read regression results
+. import excel "$data/xtnbreg_irr.xlsx", firstrow case(lower) sheet("weekly_1pct") clear
+(7 vars, 7 obs)
+
+. 
+. ** generate SIG level
+. gen sig = "***" if pval < 0.001
+(4 missing values generated)
+
+. replace sig = "**" if pval >= 0.001 & pval < 0.01
+(0 real changes made)
+
+. replace sig = "*" if pval >= 0.01 & pval < 0.05
+(1 real change made)
+
+. replace sig = "+" if pval >= 0.05 & pval < 0.1
+(0 real changes made)
+
+. 
+. ** format IRR and STDERR and keep three decimals
+. gen irr3 = string(real(string(round(irr, 0.001))), "%05.3f")
+
+. gen stderr3 = string(real(string(round(stderr, 0.001))), "%05.3f")
+
+. 
+. ** concatenate IRR and SIG
+. gen irr_sig = irr3 + sig
+
+. 
+. ** order variables
+. order var irr_sig stderr3
+
+. 
+. 
+end of do-file
+
+. exit, clear

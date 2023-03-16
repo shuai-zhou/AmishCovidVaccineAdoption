@@ -1,0 +1,292 @@
+------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  F:\OneDrive - The Pennsylvania State University\Academic\Publication_Sub\AmishCovid202302_Censu
+> s2020Pop\results/s1.5_datamerge.log
+  log type:  text
+ opened on:  25 Feb 2023, 19:07:27
+
+. 
+. *==========================================================
+. * merge data
+. *==========================================================
+. use "$data/acs2020.dta", clear
+
+. merge 1:1 countyfips using "$data/amishdata.dta", gen(mg)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                         2,687
+        from master                     2,687  (mg==1)
+        from using                          0  (mg==2)
+
+    matched                               456  (mg==3)
+    -----------------------------------------
+
+. tab mg, mi
+
+                     mg |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+        master only (1) |      2,687       85.49       85.49
+            matched (3) |        456       14.51      100.00
+------------------------+-----------------------------------
+                  Total |      3,143      100.00
+
+. keep if mg == 3
+(2,687 observations deleted)
+
+. drop mg
+
+. 
+. merge 1:1 countyfips using "$data/voting2020.dta", gen(mg)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                         2,696
+        from master                         0  (mg==1)
+        from using                      2,696  (mg==2)
+
+    matched                               456  (mg==3)
+    -----------------------------------------
+
+. tab mg, mi
+
+                     mg |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+         using only (2) |      2,696       85.53       85.53
+            matched (3) |        456       14.47      100.00
+------------------------+-----------------------------------
+                  Total |      3,152      100.00
+
+. keep if mg == 3
+(2,696 observations deleted)
+
+. drop mg
+
+. 
+. merge 1:m countyfips using "$data/covid.dta", gen(mg)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                     1,591,600
+        from master                         0  (mg==1)
+        from using                  1,591,600  (mg==2)
+
+    matched                           262,200  (mg==3)
+    -----------------------------------------
+
+. tab mg, mi
+
+                     mg |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+         using only (2) |  1,591,600       85.86       85.86
+            matched (3) |    262,200       14.14      100.00
+------------------------+-----------------------------------
+                  Total |  1,853,800      100.00
+
+. keep if mg == 3
+(1,591,600 observations deleted)
+
+. drop mg
+
+. 
+. *==========================================================
+. * save data
+. *==========================================================
+. ** gen numeric county
+. destring countyfips, gen(countynum)
+countyfips: all characters numeric; countynum generated as long
+
+. 
+. ** gen time variable
+. gen datevar = date(date, "MDY", 2099)
+
+. format datevar %td
+
+. gen quarterly = qofd(datevar)
+
+. format quarterly %tq
+
+. 
+. gen month = month(datevar)
+
+. gen day = day(datevar)
+
+. gen year = year(datevar)
+
+. gen monthly = ym(year, month)
+
+. format monthly %tm
+
+. gen week = week(datevar)
+
+. gen weekly = yw(year, week)
+
+. format weekly %tw
+
+. 
+. ** gen lag variable
+. sort countyfips datevar
+
+. by countyfips: gen vacnumlag = vacnum[_n-1]
+(456 missing values generated)
+
+. 
+. ** gen daily vaccination rate
+. gen dailynum = vacnum - vacnumlag
+(456 missing values generated)
+
+. gen dr = dailynum / totpop * 100
+(456 missing values generated)
+
+. 
+. ** gen metro
+. gen met = 1 if metro == "Metro"
+(194,350 missing values generated)
+
+. replace met = 0 if metro == "Non-metro"
+(194,350 real changes made)
+
+. label define met 1 "Metro" 0 "Non-metro"
+
+. label values met met
+
+. tab metro, mi
+
+      metro |      Freq.     Percent        Cum.
+------------+-----------------------------------
+      Metro |     67,850       25.88       25.88
+  Non-metro |    194,350       74.12      100.00
+------------+-----------------------------------
+      Total |    262,200      100.00
+
+. tab met, mi
+
+        met |      Freq.     Percent        Cum.
+------------+-----------------------------------
+  Non-metro |    194,350       74.12       74.12
+      Metro |     67,850       25.88      100.00
+------------+-----------------------------------
+      Total |    262,200      100.00
+
+. 
+. ** keep Amish county from Cory
+. keep if ///
+>         statename == "OH" | statename == "PA" | statename == "IN" | statename == "WI" | statename == "NY" 
+> | ///
+>         statename == "MI" | statename == "MO" | statename == "KY" | statename == "IA" | statename == "IL"
+(56,925 observations deleted)
+
+. 
+. ** generate Evangelical
+. ** because the US Religion Census includes the Amish in the aggregated category “evangelical”
+. ** their numbers should be subtracted from the category “evangelical”
+. gen evang_no_amish = evangpct - amishpct
+
+. 
+. ** generate median income in 1000
+. gen hhincmed1000 = hhinc_med / 1000
+
+. 
+. ** save data
+. compress
+  variable datevar was float now int
+  variable quarterly was float now int
+  variable month was float now byte
+  variable day was float now byte
+  variable year was float now int
+  variable monthly was float now int
+  variable week was float now byte
+  variable weekly was float now int
+  variable met was float now byte
+  variable fullname was str42 now str35
+  variable acscounty was str33 now str21
+  variable countyname was str33 now str21
+  variable statename was str3 now str2
+  (11,084,850 bytes saved)
+
+. order countyfips date datevar day week weekly month monthly year ///
+>         vacnum vacnumlag dailynum ///
+>         dr totpop amishpct evang_no_amish colle hhincmed1000 trump2020 ///
+>         met countynum fullname
+
+. keep countyfips date datevar day week weekly month monthly year ///
+>         vacnum vacnumlag dailynum ///
+>         dr totpop amishpct evang_no_amish colle hhincmed1000 trump2020 ///
+>         met countynum fullname
+
+. 
+. label var dailynum "Daily vaccination person"
+
+. label var vacnum "Vaccination person"
+
+. label var vacnumlag "Lagged vaccination person"
+
+. label var dr "Daily Vaccination Rate"
+
+. label var amishpct "% Amish population"
+
+. label var evang_no_amish "% Evangelical protestant"
+
+. label var colle "% College graduate"
+
+. label var hhincmed1000 "Median household income (in $1,000)"
+
+. label var trump2020 "% Voting for Republican in 2020"
+
+. label var met "Metropolitan county"
+
+. label var totpop "Total population in 2020"
+
+. 
+. ** keep 2021-02-01 to 2022-11-01
+. drop if datevar < date("01feb2021", "DMY")
+(17,850 observations deleted)
+
+. drop if datevar > date("01nov2022", "DMY")
+(1,785 observations deleted)
+
+. sum
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+  countyfips |          0
+        date |          0
+     datevar |    185,640    22573.66    154.2355      22312      22944
+         day |    185,640    15.52115    8.764217          1         31
+        week |    185,640    23.72115    14.12085          1         52
+-------------+---------------------------------------------------------
+      weekly |    185,640    3213.321    21.96845       3176       3266
+       month |    185,640    5.880769    3.232835          1         12
+     monthly |    185,640    741.1731    5.067714        733        753
+        year |    185,640    2021.358    .4793222       2021       2022
+      vacnum |    185,640     23463.3    37501.66          0     438631
+-------------+---------------------------------------------------------
+   vacnumlag |    185,640    23404.57    37456.57          0     436978
+    dailynum |    185,640    58.73139    299.6836     -43136      48586
+          dr |    185,640    .0950842    .2526606  -8.593575   19.77628
+      totpop |    185,640    56286.11     72647.1       3538     552984
+    amishpct |    185,640    2.134559    4.167102   .0046448   44.75725
+-------------+---------------------------------------------------------
+evang_no_a~h |    185,640    18.35079    14.12427   .0419827   78.19032
+       colle |    185,640    19.69374    6.549861   8.456083   54.30946
+hhincmed1000 |    185,640    53.06303    8.541967     29.844    104.161
+   trump2020 |    185,640    67.97087     10.2923   27.67528   89.20334
+         met |    185,640    .2633053    .4404278          0          1
+-------------+---------------------------------------------------------
+   countynum |    185,640    31901.13    11841.51      17001      55141
+    fullname |          0
+
+. save "$data/resdata.dta", replace
+file data/resdata.dta saved
+
+. 
+. *==========================================================
+. * end logging
+. *==========================================================
+. log close _all
+      name:  <unnamed>
+       log:  F:\OneDrive - The Pennsylvania State University\Academic\Publication_Sub\AmishCovid202302_Censu
+> s2020Pop\results/s1.5_datamerge.log
+  log type:  text
+ closed on:  25 Feb 2023, 19:07:35
+------------------------------------------------------------------------------------------------------------
