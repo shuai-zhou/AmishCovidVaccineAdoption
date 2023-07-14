@@ -4,11 +4,9 @@
 clear
 set more off
 macro drop _all
-// set scheme lean1 // plotplain s2mono s1color s1mono lean1
+set scheme lean1
 
-cap cd "~/work/amishcovid/"
-cap cd "F:/OneDrive - The Pennsylvania State University/Academic/Publication_Sub/AmishCovid202302_Census2020Pop/"
-cap cd "C:/Users/sxz217/OneDrive - The Pennsylvania State University/Academic/Publication_Sub/AmishCovid202302_Census2020Pop/"
+cap cd "D:/AmishCovid/"
 global data  = "$pwd" + "data"
 global  results = "$pwd" + "results"
 
@@ -19,37 +17,9 @@ log close _all
 log using "$results/s3.1_xtnbreg_coef.log", replace
 
 *==========================================================
-* tutorials
-*==========================================================
-** Non-negative Continuous Right-skewed Panel Data
-** https://www.statalist.org/forums/forum/general-stata-discussion/general/1590559-non-negative-continuous-right-skewed-zero-inflated-panel-data-analysis
-
-** Negative Binomial Regression
-** https://stats.oarc.ucla.edu/stata/dae/negative-binomial-regression/
-
-** Model A Continuous DV With [0, ∞] Range
-** https://stats.stackexchange.com/questions/142134/how-should-i-model-a-continuous-dependent-variable-in-the-0-infty-range
-
-*==========================================================
 * macro IVs
 *==========================================================
-// local ivs amishpct evang_no_amish colle trump2020 hhincmed1000
-
 local ivs amishpct evang_no_amish trump2020 hhincmed1000
-
-// *==========================================================
-// * compile median and average hhinc in 2020
-// *==========================================================
-// infile using "$data/R13277287.dct", using("$data/R13277287_SL050.txt")
-// rename FIPS countyfips
-// rename A14006_001 hhincmed2020
-// rename A14008_001 hhincavg2020
-// gen hhincmed_1000_2020 = hhincmed2020 / 1000
-// gen hhincavg_1000_2020 = hhincavg2020 / 1000
-// keep countyfips hhinc*
-
-// tempfile hhinc2020
-// save `hhinc2020'
 
 *==========================================================
 * daily model: all counties
@@ -192,15 +162,6 @@ outreg2 using "$results/xtnbreg_coef.doc", append stats(coef se) ///
 *==========================================================
 clear
 log close _all
-
-*==========================================================
-* erase txt files
-*==========================================================
-cd "$results"
-local txtfiles: dir . files "*.txt"
-foreach txt of local txtfiles {
-	erase `txt'
-}
 
 // *==========================================================
 // * clear memory and exit
